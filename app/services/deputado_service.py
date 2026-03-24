@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from app.models.deputado_orgao import DeputadoOrgao
 from app.schemas.schemas import DeputadoOrgaoResponse
-from sqlalchemy import func
+from sqlalchemy import func, or_, and_
 from app.models.votacao import Votacao 
 
 
@@ -79,21 +79,29 @@ def analisa_votos_deputado(db: Session, nome: str, ano: int):
     
     votos_encontrados = query.all()
     
-    # 2. Conta os votos na mão (mais fácil de entender)
+    # 2. Conta os votos mapeando as strings do banco para chaves limpas da API
+    mapa_votos = {
+        "Sim": "sim",
+        "Não": "nao",
+        "Abstenção": "abstencao",
+        "Obstrução": "obstrucao"
+    }
+    
     resumo = {
-        "Sim": 0,
-        "Não": 0,
-        "Abstenção": 0,
-        "Obstrução": 0,
-        "Total": len(votos_encontrados)
+        "sim": 0,
+        "nao": 0,
+        "abstencao": 0,
+        "obstrucao": 0,
+        "total": len(votos_encontrados)
     }
     
     detalhes = [] # Para guardar exemplos das votações
     
     for v in votos_encontrados:
-        # Se o voto existir no nosso dicionário de resumo, soma 1
-        if v.voto in resumo:
-            resumo[v.voto] += 1
+        chave_limpa = mapa_votos.get(v.voto)
+        # Se o voto bater com nosso mapeamento, soma na chave correta do JSON
+        if chave_limpa in resumo:
+            resumo[chave_limpa] += 1
         
         # Guarda alguns detalhes para mostrar na tela
         detalhes.append({

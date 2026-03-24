@@ -39,7 +39,7 @@ def carregar_votacoes_bd():
       LEFT JOIN `basedosdados.br_camara_dados_abertos.votacao` AS v
         ON vp.id_votacao = v.id_votacao
       WHERE v.data >= '2023-01-01'
-      LIMIT 1000
+      LIMIT 50000
     """
 
     try:
