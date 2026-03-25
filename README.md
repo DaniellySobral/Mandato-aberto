@@ -1,8 +1,23 @@
 # Mandato Aberto API
 
-Bem-vindo(a) ao Mandato Aberto API! Este é um sistema back-end construído em Python moderno focado em transparência pública. Ele fornece dados abertos estruturados sobre deputados federais brasileiros, seus mandatos, atuações em órgãos (como comissões) e histórico de votações.
+Bem-vindo(a) ao Mandato Aberto API! Este é um sistema back-end construído em Python moderno focado em transparência pública. Ele fornece dados abertos estruturados sobre deputados federais brasileiros, incluindo mandatos, atuações em órgãos (como comissões) e histórico de votações.
 
-O projeto coleta, trata e expõe dados através de endpoints de alta performance, prontos para serem consumidos por aplicações front-end, painéis de análise ou aplicativos mobile.
+O objetivo é facilitar o acesso da população brasileira a informações sobre atuação parlamentar, contribuindo para a educação política e o exercício da cidadania.
+
+O projeto coleta, trata e expõe dados através de endpoints de alta performance, prontos para serem consumidos por aplicações front-end (com potencial de evolução para um portal completo), painéis de análise ou aplicativos mobile.
+
+---
+
+## Resumo
+
+API backend desenvolvida com FastAPI para coleta, processamento e disponibilização de dados públicos de deputados federais brasileiros.
+
+Foco em:
+* Integração com dados governamentais
+* Processamento em larga escala (ETL)
+* Arquitetura escalável e organizada
+
+---
 
 ## Tecnologias e Conceitos Aplicados
 
@@ -42,7 +57,7 @@ mandato-aberto/
 
 ---
 
-## Como rodar o projeto localmente
+## ⚙️ Como rodar o projeto localmente
 
 Siga o passo a passo abaixo para rodar a aplicação:
 
@@ -82,7 +97,7 @@ Isto vai ler e formatar os dados localmente usando Pandas.
 #### Opção B: Carga via Nuvem (Google Cloud BigQuery)
 Se você quer preencher os registros gigantes de Votações baixando a forma mais atualizada direto da nuvem (projeto Base dos Dados):
 ```bash
-python scripts/ingestor_votacoes.py
+python -m scripts.ingestor_votacoes
 ```
 (Ele solicitará confirmação antes de rodar para manter o controle do seu Billing Google Cloud).
 
@@ -111,5 +126,68 @@ http://127.0.0.1:8000/docs
 - GET /deputados/analise_votos
   Buscador quantitativo do histórico do mandato. Computa dezenas de sessões num ano específico e consolida o comportamento do parlamentar (Soma total de votos "Sim", "Não", "Abstenção", etc).
 
+### Exemplo de Consulta (Terminal)
+
+```bash
+curl -s -X GET "http://127.0.0.1:8000/deputados/analise_votos?nome=Silva&ano=2023" | python -m json.tool
+```
+
+```json
+{
+    "deputado": "Silva",
+    "ano": 2023,
+    "resumo": {
+        "sim": 149,
+        "nao": 99,
+        "abstencao": 0,
+        "obstrucao": 6,
+        "total": 254
+    },
+    "primeiras_votacoes": [
+        {
+            "data": "2023-07-06T00:00:00",
+            "voto": "Sim",
+            "id_votacao": "2196833362"
+        },
+        {
+            "data": "2023-12-05T00:00:00",
+            "voto": "Sim",
+            "id_votacao": "22185388"
+        },
+        {
+            "data": "2023-11-29T00:00:00",
+            "voto": "Sim",
+            "id_votacao": "219008493"
+        },
+        {
+            "data": "2023-12-15T00:00:00",
+            "voto": "Sim",
+            "id_votacao": "238469231"
+        },
+        {
+            "data": "2023-05-04T00:00:00",
+            "voto": "Sim",
+            "id_votacao": "235117951"
+        }
+    ]
+}
+```
+
 ---
-Este projeto foi desenvolvido com foco em Ciência de Dados, Integração com Nuvem, Engenharia Back-end e Transparência Pública.
+
+## Possíveis melhorias futuras
+
+* Implementação de autenticação e segurança das rotas
+* Deploy em ambiente cloud (AWS, GCP ou Azure)
+* Criação de interface frontend para visualização em painéis interativos
+
+---
+
+## Sobre o desenvolvimento
+
+Este projeto foi desenvolvido individualmente com foco em:
+* Engenharia de software back-end moderna
+* Integração com APIs e dados em nuvem (BigQuery)
+* Arquitetura em camadas e organização refinada de código
+
+Representa a aplicação prática de conceitos modernos de desenvolvimento, manipulação de banco de dados e transparência pública.
