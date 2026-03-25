@@ -57,13 +57,13 @@ mandato-aberto/
 
 ---
 
-## ⚙️ Como rodar o projeto localmente
+## Como rodar o projeto localmente
 
 Siga o passo a passo abaixo para rodar a aplicação:
 
 ### 1. Clonar o repositório
 ```bash
-git clone https://github.com/SEU-USUARIO/mandato-aberto.git
+git clone https://github.com/DaniellySobral/mandato-aberto.git
 cd mandato-aberto
 ```
 
@@ -95,7 +95,10 @@ python -m app.db_loader
 Isto vai ler e formatar os dados localmente usando Pandas.
 
 #### Opção B: Carga via Nuvem (Google Cloud BigQuery)
-Se você quer preencher os registros gigantes de Votações baixando a forma mais atualizada direto da nuvem (projeto Base dos Dados):
+
+⚠️ Observação: Requer configuração prévia de credenciais do Google Cloud.
+
+Se você quer preencher os registros gigantes de Votações baixando a forma mais atualizada direto da nuvem:
 ```bash
 python -m scripts.ingestor_votacoes
 ```
