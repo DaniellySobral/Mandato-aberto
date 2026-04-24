@@ -11,7 +11,7 @@ BILLING_PROJECT_ID = "mandato-aberto-dados"
 def carregar_votacoes_bd():
     print("🔌 Conectando ao Base dos Dados (BigQuery)...")
 
-        # QUERY COMPLETA (Pegando todos os dados importantes)
+        # QUERY COMPLETA no banco (Pegando todos os dados importantes para as votações)
     query = """
       SELECT
         v.data as data_hora,
@@ -43,7 +43,7 @@ def carregar_votacoes_bd():
     """
 
     try:
-        # Executa a query e traz como DataFrame do Pandas
+        # Executo a query e já trago o resultado no formato de DataFrame do Pandas
         df = bd.read_sql(query=query, billing_project_id=BILLING_PROJECT_ID)
         print(f"✅ Sucesso! Foram retornadas {len(df)} linhas do Base dos Dados.")
         
@@ -52,15 +52,15 @@ def carregar_votacoes_bd():
         print("Dica: Verifique se seu billing_id está correto e se você tem internet.")
         sys.exit()
 
-    # Cria a tabela local
+    # Crio a tabela no banco de dados local caso ela ainda não exista
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     
     print("💾 Salvando no banco local (SQLite)...")
 
     try:
-        # O pandas faz o 'bulk insert' direto no banco de forma muito rápida
-        # O parâmetro 'if_exists="append"' adiciona aos dados existentes
+        # Uso o pandas para fazer o 'bulk insert' direto no banco de dados, o que deixa o processo bem rápido
+        # A configuração 'if_exists="append"' garante que eu adicione as novas linhas aos dados já existentes
         df.to_sql(
             'votacao', 
             con=engine, 
@@ -75,7 +75,7 @@ def carregar_votacoes_bd():
         db.close()
 
 if __name__ == "__main__":
-    # Confirmação antes de rodar (para evitar custos desnecessários na nuvem)
+    # Criei essa confirmação antes de rodar para evitar custos desnecessários com a nuvem do BigQuery
     confirmar = input("Isso vai consultar o BigQuery. Tem certeza? (s/n): ")
     if confirmar.lower() == 's':
         carregar_votacoes_bd()

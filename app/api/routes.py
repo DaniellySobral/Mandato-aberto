@@ -20,8 +20,8 @@ def advanced_search(
     db: Session = Depends(get_db)
 ):
     """
-    Endpoint para consulta com múltiplos filtros.
-    Exemplo de URL: 
+    Aqui eu criei uma rota para permitir consultas avançadas, aceitando vários filtros ao mesmo tempo.
+    Exemplo de uso na URL: 
     /deputados/advanced_search?nome=Silva&uf=SP&ano_inicio=2015&ano_fim=2020
     """
     resultados = buscar_deputados_avancada(db, nome, uf, partido, ano_inicio, ano_fim)
@@ -35,14 +35,15 @@ def analisar_votos(
     db: Session = Depends(get_db)
 ):
     """
-    Retorna um resumo de quantos Sim/Não/Abstenção o deputado teve no ano.
-    Exemplo: /deputados/analise_votos?nome=Alice&ano=2024
+    Nesta rota eu retorno a contagem de votos (Sim/Não/Abstenção) já agrupada por deputado.
+    Se a busca encontrar mais de um deputado com o mesmo nome (ex: vários deputados chamados "Silva"),
+    eu devolvo a contagem separada para cada um deles.
+    Exemplo de uso: /deputados/analise_votos?nome=Silva&ano=2024
     """
-    resumo, detalhes = analisa_votos_deputado(db, nome, ano)
+    resultados = analisa_votos_deputado(db, nome, ano)
     
     return {
-        "deputado": nome,
+        "termo_busca": nome,
         "ano": ano,
-        "resumo": resumo,
-        "primeiras_votacoes": detalhes[:5] # Mostra só as 5 primeiras como exemplo
+        "deputados_encontrados": resultados
     }

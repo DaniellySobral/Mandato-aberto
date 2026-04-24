@@ -4,10 +4,10 @@ from app.api.routes import router
 
 app = FastAPI(title="Mandato Aberto API")
 
-# Cria as tabelas caso não existam
+# Aqui eu crio as tabelas no banco de dados automaticamente, caso elas ainda não existam
 Base.metadata.create_all(bind=engine)
 
-# Inclui as rotas que definimos em routes.py
+# Neste ponto, eu incluo as rotas da API que defini no arquivo routes.py
 app.include_router(router)
 
 @app.get("/")

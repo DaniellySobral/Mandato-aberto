@@ -5,13 +5,13 @@ from app.models.deputado_orgao import DeputadoOrgao
 from sqlalchemy.exc import IntegrityError
 
 def carregar_csv():
-    # 1. Caminho do arquivo CSV
+    # 1. Defino o caminho onde o arquivo CSV está salvo no meu projeto
     caminho_arquivo = './data/br_camara_dados_abertos_orgao_deputado.csv'
     
     print("Iniciando a leitura do CSV...")
     
     try:
-        # 2. Lê o CSV
+        # 2. Utilizo o Pandas para ler o CSV ignorando linhas quebradas
         df = pd.read_csv(caminho_arquivo, sep=',', encoding='utf-8', on_bad_lines='warn', dtype=str)
         print(f"Total de linhas lidas: {len(df)}")
         
@@ -22,10 +22,10 @@ def carregar_csv():
         print(f"❌ Erro ao ler o arquivo CSV: {e}")
         sys.exit()
 
-    # 3. Cria as tabelas (se não existirem)
+    # 3. Garanto que as tabelas do banco estejam criadas
     Base.metadata.create_all(bind=engine)
     
-    # 4. Inicia a conexão com o banco
+    # 4. Abro a conexão com o banco de dados
     db = SessionLocal()
     
     registros_para_salvar = []
@@ -34,7 +34,7 @@ def carregar_csv():
 
     print("Processando os dados...")
 
-    # 5. Percorre o DataFrame linha por linha
+    # 5. Percorro o arquivo do Pandas linha por linha
     for index, row in df.iterrows():
         try:
             # Tratamento de datas
@@ -44,7 +44,7 @@ def carregar_csv():
             if pd.notna(inicio): inicio = inicio.date()
             if pd.notna(final): final = final.date()
 
-            # Cria o objeto do Modelo
+            # Crio um registro baseado no meu modelo do SQLAlchemy
             registro = DeputadoOrgao(
                 id_orgao=row.get('id_orgao'),
                 nome=row.get('nome'),
@@ -58,7 +58,7 @@ def carregar_csv():
             )
             registros_para_salvar.append(registro)
 
-            # Commit em lotes de 500 para ser mais seguro
+            # Para não sobrecarregar o banco, eu salvo as informações em lotes de 500
             if len(registros_para_salvar) >= 500:
                 try:
                     db.bulk_save_objects(registros_para_salvar)
@@ -67,13 +67,13 @@ def carregar_csv():
                     print(f"✅ Salvo lote. Total processado até agora: {index + 1} linhas")
                     registros_para_salvar = []
                 except IntegrityError as e:
-                    # Se der erro de duplicata ou integridade, desfaz (rollback) e ignora
+                    # Se eu encontrar algum erro de duplicidade, eu desfaço o lote (rollback) e ignoro
                     print(f"⚠️ Erro de integridade (duplicidade?) no lote {index + 1}: {e}")
                     db.rollback()
                     erros_encontrados += len(registros_para_salvar)
                     registros_para_salvar = []
                 except Exception as e:
-                    # Outros erros gerais
+                    # Tratamento para quaisquer outros erros inesperados
                     print(f"❌ Erro geral no lote {index + 1}: {e}")
                     db.rollback()
                     erros_encontrados += len(registros_para_salvar)
@@ -84,7 +84,7 @@ def carregar_csv():
             erros_encontrados += 1
             continue
 
-    # 6. Salva o que sobrou no final
+    # 6. Salvo qualquer registro que tenha sobrado no final do loop
     if registros_para_salvar:
         try:
             db.bulk_save_objects(registros_para_salvar)

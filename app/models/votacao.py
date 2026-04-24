@@ -4,33 +4,33 @@ from app.core.database import Base
 class Votacao(Base):
     __tablename__ = "votacao"
 
-    # Identificação
+    # Minhas colunas de Identificação
     id = Column(Integer, primary_key=True, index=True)
     id_votacao = Column(String, index=True) 
     
-    # Dados do Deputado
+    # Informações do Deputado que votou
     id_deputado = Column(String, index=True)
     nome = Column(String, index=True)
     sigla_partido = Column(String)
     sigla_uf = Column(String)
     id_legislatura = Column(Integer)
     
-    # Dados do Voto Individual
+    # O voto que o deputado deu (Sim, Não, Abstenção, etc)
     voto = Column(String)
     
-    # Dados da Votação (Contexto)
-    data_hora = Column(DateTime, nullable=True, index=True)       # Data/Hora principal
-    data_registro = Column(DateTime, nullable=True)                # Data de registro
-    horario_registro = Column(String, nullable=True)               # Horário exato
+    # Contexto de quando a votação aconteceu
+    data_hora = Column(DateTime, nullable=True, index=True)        # Data e hora principal da votação
+    data_registro = Column(DateTime, nullable=True)                # Data em que o voto foi registrado
+    horario_registro = Column(String, nullable=True)               # Horário exato do registro
     
-    # Dados do Órgão (Onde votou)
+    # Onde a votação ocorreu (Plenário, Comissões, etc)
     id_orgao = Column(String, nullable=True, index=True)
     sigla_orgao = Column(String, nullable=True)
     
-    # Dados da Proposta (O que foi votado)
-    id_ultima_proposicao = Column(String, nullable=True, index=True) # ID do PL/PEC
-    descricao_ultima_proposicao = Column(Text, nullable=True)        # Título da Proposta
-    descricao_votacao = Column(Text, nullable=True)                  # O assunto da votação
+    # O que estava sendo votado
+    id_ultima_proposicao = Column(String, nullable=True, index=True) # O ID oficial do PL/PEC
+    descricao_ultima_proposicao = Column(Text, nullable=True)        # Título da proposta que estava em pauta
+    descricao_votacao = Column(Text, nullable=True)                  # O assunto específico desta votação
     
-    # Resultado
-    aprovacao = Column(String, nullable=True) # Ex: "Aprovado", "Rejeitado"
+    # O resultado final (Ex: "Aprovado", "Rejeitado")
+    aprovacao = Column(String, nullable=True)
