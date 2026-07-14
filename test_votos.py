@@ -7,6 +7,6 @@ engine = create_engine("sqlite:///mandato_aberto.db")
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 db = SessionLocal()
 
-resultados = analisa_votos_deputado(db, "Silva", 2024)
+resultados = analisa_votos_deputado(db, "Magda Mofatto", 2023)
 import json
 print(json.dumps(resultados, indent=2, default=str))
