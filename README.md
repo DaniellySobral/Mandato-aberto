@@ -29,7 +29,8 @@ Principais tecnologias empregadas:
 - [SQLite](https://www.sqlite.org/): Banco de dados leve e portátil, utilizado para armazenamento.
 - [Alembic / Pydantic](https://docs.pydantic.dev/): Serialização, validação estrita de dados baseada em tipagem do Python e estrutura de respostas JSON.
 - [Pandas](https://pandas.pydata.org/): Utilizado no processo de ETL (Extração, Transformação e Carga) para limpeza de grandes lotes de dados.
-- [Acesso à Nuvem (Base dos Dados / Google BigQuery)](https://basedosdados.org/): Consumo direto de dados governamentais armazenados na nuvem através de queries em SQL otimizadas pelo supercomputador do BigQuery, trazendo dados em massa para o banco de dados local.
+- [Acesso à Nuvem (Base dos Dados / Google BigQuery)](https://basedosdados.org/): Consumo direto de dados governamentais na nuvem através de queries SQL otimizadas pelo BigQuery.
+- [Pytest](https://docs.pytest.org/): Framework de testes automatizados utilizado para garantir a estabilidade das regras de negócio através de testes unitários isolados com banco em memória.
 
 ---
 
@@ -48,6 +49,10 @@ mandato-aberto/
 |
 |-- scripts/
 |   |-- ingestor_votacoes.py # Rotina de Cloud: Busca dados direto do BigQuery para o SQLite
+|
+|-- tests/            # Pasta de testes automatizados unitários
+|   |-- conftest.py   # Configurações globais e fixtures do pytest (banco em memória)
+|   |-- test_deputado_service.py # Casos de teste unitário do serviço de deputados
 |
 |-- data/             # Arquivos-fonte locais do governo (.csv) auxiliares
 |-- main.py           # Ponto de entrada (Entrypoint) do aplicativo Web/Uvicorn
@@ -111,6 +116,12 @@ uvicorn main:app --reload
 ```
 A API estará rodando no endereço: http://127.0.0.1:8000
 
+### 6. Como rodar os testes automatizados
+Para rodar a suíte de testes unitários isolados com banco de dados SQLite em memória através do pytest:
+```bash
+PYTHONPATH=. ./venv/bin/pytest tests/
+```
+
 ---
 
 ## Documentação e Swagger UI
@@ -127,53 +138,51 @@ http://127.0.0.1:8000/docs
   Pesquisa multiparâmetro (Nome, UF do estado, Sigla do partido) e filtros de corte temporal sobrepostos.
 
 - GET /deputados/analise_votos
-  Buscador quantitativo do histórico do mandato. Computa dezenas de sessões num ano específico e consolida o comportamento do parlamentar (Soma total de votos "Sim", "Não", "Abstenção", etc).
+  Buscador detalhado do comportamento de votação do parlamentar e histórico de partidos. 
+  Retorna o partido atual, total de mudanças partidárias (`total_mudancas_partido`), partidos passados (`partidos_anteriores`), resumo quantitativo de votos em determinado ano e a listagem de proposições votadas como "Sim" ou "Não" com status de aprovação na Câmara (`aprovada_na_camara`).
 
 ### Exemplo de Consulta (Terminal)
 
 ```bash
-curl -s -X GET "http://127.0.0.1:8000/deputados/analise_votos?nome=Silva&ano=2023" | python -m json.tool
+curl -s -X GET "http://127.0.0.1:8000/deputados/analise_votos?nome=Salles&ano=2023" | python -m json.tool
 ```
 
 ```json
-{
-    "deputado": "Silva",
-    "ano": 2023,
+[
+  {
+    "id_deputado": "220633",
+    "nome": "Ricardo Salles",
+    "partido_atual": "PL",
+    "total_mudancas_partido": 1,
+    "partidos_anteriores": [
+      "NOVO"
+    ],
+    "uf": "SP",
     "resumo": {
-        "sim": 149,
-        "nao": 99,
-        "abstencao": 0,
-        "obstrucao": 6,
-        "total": 254
+      "sim": 12,
+      "nao": 8,
+      "abstencao": 0,
+      "obstrucao": 0,
+      "total": 20
     },
-    "primeiras_votacoes": [
-        {
-            "data": "2023-07-06T00:00:00",
-            "voto": "Sim",
-            "id_votacao": "2196833362"
-        },
-        {
-            "data": "2023-12-05T00:00:00",
-            "voto": "Sim",
-            "id_votacao": "22185388"
-        },
-        {
-            "data": "2023-11-29T00:00:00",
-            "voto": "Sim",
-            "id_votacao": "219008493"
-        },
-        {
-            "data": "2023-12-15T00:00:00",
-            "voto": "Sim",
-            "id_votacao": "238469231"
-        },
-        {
-            "data": "2023-05-04T00:00:00",
-            "voto": "Sim",
-            "id_votacao": "235117951"
-        }
+    "proposicoes_votadas_sim": [
+      {
+        "id_proposicao": "2349493",
+        "descricao": "Aprovado o Requerimento de Urgência...",
+        "aprovada_na_camara": true,
+        "data": "2023-05-21T00:00:00"
+      }
+    ],
+    "proposicoes_votadas_nao": [
+      {
+        "id_proposicao": "2200561",
+        "descricao": "Mantido o texto...",
+        "aprovada_na_camara": null,
+        "data": "2023-12-15T00:00:00"
+      }
     ]
-}
+  }
+]
 ```
 
 ---
